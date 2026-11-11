@@ -131,6 +131,16 @@ def setup_evaluators(client: Client, project_id: str) -> None:
     print(f"  {made} online evaluator(s) scoring new traces")
 
 
+def _question(inputs: dict) -> str | None:
+    """The user's question, from a run rooted at the agent (`messages`) or a wrapper."""
+    if inputs.get("question"):
+        return inputs["question"]
+    for m in inputs.get("messages") or []:
+        if isinstance(m, dict) and m.get("role") in ("user", "human"):
+            return m.get("content")
+    return None
+
+
 def promote_traces(client: Client, limit: int) -> None:
     """Add failing production traces to the dataset.
 
@@ -149,7 +159,7 @@ def promote_traces(client: Client, limit: int) -> None:
     for run in client.list_runs(project_name=PROJECT, is_root=True, limit=100):
         if added >= limit:
             break
-        q = (run.inputs or {}).get("question")
+        q = _question(run.inputs or {})
         if not q or q in have:
             continue
         stats = run.feedback_stats or {}

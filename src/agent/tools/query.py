@@ -252,7 +252,7 @@ def export_report(result_id: str, title: str) -> dict:
     """
     import csv
     rows = results.load(result_id)
-    path = results.RESULTS_DIR / f"{result_id}.csv"
+    path = results.DIR / f"{result_id}.csv"
     if rows:
         with path.open("w", newline="") as fh:
             w = csv.DictWriter(fh, fieldnames=list(rows[0]))
